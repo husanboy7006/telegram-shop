@@ -53,48 +53,94 @@ async def cmd_start(message: types.Message):
         reply_markup=markup
     )
 
+ADMIN_ID = os.getenv("ADMIN_ID")
+
+# Product Data (Must match script.js for correct pricing/names)
+PRODUCTS = {
+    "1": {"name": "Simsiz Quloqchin (Oddiy)", "price": 95000},
+    "2": {"name": "Fitnes Braslet M6", "price": 120000},
+    "3": {"name": "Telefon G'ilofi (Chexol)", "price": 35000},
+    "4": {"name": "USB Kabel (Type-C)", "price": 25000},
+    "5": {"name": "Quyosh Ko'zoynagi", "price": 60000},
+    "6": {"name": "Ryukzak (Maktab uchun)", "price": 185000}
+}
+
 @dp.message(lambda message: message.web_app_data)
 async def handle_webapp_data(message: types.Message):
     try:
         data = json.loads(message.web_app_data.data)
-        text = "📦 **Yangi Buyurtma!**\n\n"
-        for product_id, quantity in data.items():
-            text += f"🆔 Mahsulot ID: {product_id}, Soni: {quantity}\n"
-        await message.answer(f"{text}\n✅ Buyurtma qabul qilindi!", parse_mode="Markdown")
+        
+        # 1. Extract Data
+        cart = data.get('cart', {})
+        user_info = data.get('user_info', {})
+        
+        # 2. Build Receipt Text
+        receipt = "📦 **YANGI BUYURTMA**\n\n"
+        total_sum = 0
+        
+        for p_id, count in cart.items():
+            product = PRODUCTS.get(str(p_id))
+            if product:
+                item_sum = product['price'] * count
+                total_sum += item_sum
+                # Thousands separator for readability
+                receipt += f"▫️ {product['name']}\n   {count} x {product['price']:,} = {item_sum:,} so'm\n"
+        
+        receipt += f"\n💰 **JAMI: {total_sum:,} so'm**\n"
+        receipt += f"➖➖➖➖➖➖➖➖\n"
+        receipt += f"👤 **Mijoz:** {user_info.get('name')}\n"
+        receipt += f"📞 **Tel:** {user_info.get('phone')}\n"
+        receipt += f"📍 **Manzil:** {user_info.get('address')}\n"
+
+        # 3. Send Confirmation to User
+        await message.answer(
+            f"✅ Rahmat! Buyurtmangiz qabul qilindi.\n\n{receipt}\nTez orada operatorimiz bog'lanadi.",
+            parse_mode="Markdown"
+        )
+        
+        # 4. Send Notification to Admin
+        if ADMIN_ID:
+            try:
+                await bot.send_message(
+                    chat_id=ADMIN_ID,
+                    text=f"🚨 **YANGI ADMIN XABARI** 🚨\n\nUsername: @{message.from_user.username}\n\n{receipt}",
+                    parse_mode="Markdown"
+                )
+            except Exception as e:
+                logging.error(f"Failed to send to admin: {e}")
+            
     except Exception as e:
-        logging.error(f"Error: {e}")
+        logging.error(f"Error handling webapp data: {e}")
+        await message.answer("❌ Xatolik yuz berdi. Iltimos qaytadan urining.")
 
 # --- Web Server Handlers ---
 async def index_handler(request):
-    return web.FileResponse('./index.html')
-
-async def style_handler(request):
-    return web.FileResponse('./style.css')
-
-async def script_handler(request):
-    return web.FileResponse('./script.js')
+    try:
+        return web.FileResponse('./web-app/dist/index.html')
+    except FileNotFoundError:
+        return web.Response(text="Build not found. Run 'npm run build' in web-app directory.", status=404)
 
 # --- Main App Setup ---
 async def on_startup(app):
     # Start polling in background
-    # Note: In production with high load, webhooks are better, 
-    # but polling is easier for setup and works fine for small apps.
     asyncio.create_task(dp.start_polling(bot))
 
 def main():
     app = web.Application()
     
-    # Static file routes
+    # Serve the main index file for root and explicit index.html requests
     app.router.add_get('/', index_handler)
     app.router.add_get('/index.html', index_handler)
-    app.router.add_get('/style.css', style_handler)
-    app.router.add_get('/script.js', script_handler)
     
-    # Serve static assets folder
-    # Verify assets folder exists first to avoid error
-    if os.path.exists('./assets'):
-        app.router.add_static('/assets', './assets')
-    
+    # Serve static assets from the build output
+    # The React build output structure is: dist/assets/index-....js
+    # We verify the path exists to avoid errors on startup if not built yet
+    dist_assets_path = './web-app/dist/assets'
+    if os.path.exists(dist_assets_path):
+        app.router.add_static('/assets', dist_assets_path)
+    else:
+        print(f"Warning: Assets path '{dist_assets_path}' not found. Did you run 'npm run build'?")
+
     # Start bot in background when app starts
     app.on_startup.append(on_startup)
     
