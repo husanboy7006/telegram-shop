@@ -4,55 +4,55 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// Mock Data - O'zbek tilida, faqat elektronika
+// Mock Data - Hamyonbop mahsulotlar (UZS)
 const products = [
     {
         id: 1,
-        name: "Simsiz Quloqchinlar Premium",
-        price: 99.99,
-        image: "./assets/headphones.jpg",
+        name: "Simsiz Quloqchin (Oddiy)",
+        price: 95000,
+        image: "./assets/headphones.jpg", // TWS i12 kabi
         category: "electronics",
-        badge: "yangi"
+        badge: "arzon"
     },
     {
         id: 2,
-        name: "Aqlli Soat (Smart Watch)",
-        price: 149.50,
+        name: "Fitnes Braslet M6",
+        price: 120000,
         image: "./assets/watch.jpg",
         category: "electronics",
-        badge: "chegirma"
+        badge: "xit"
+    },
+    {
+        id: 3,
+        name: "Telefon G'ilofi (Chexol)",
+        price: 35000,
+        image: "./assets/wallet.jpg", // Hozircha wallet rasmi turibdi
+        category: "accessories",
+        badge: null
     },
     {
         id: 4,
-        name: "Mexanik Klaviatura Pro",
-        price: 120.00,
-        image: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?w=500&auto=format&fit=crop&q=60",
-        category: "electronics",
-        badge: "yangi"
-    },
-    {
-        id: 7,
-        name: "O'yin Sichqonchasi (Gaming Mouse)",
-        price: 45.00,
-        image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&auto=format&fit=crop&q=60",
+        name: "USB Kabel (Type-C)",
+        price: 25000,
+        image: "./assets/backpack.jpg", // Placeholder
         category: "electronics",
         badge: null
     },
     {
-        id: 8,
-        name: "PowerBank 20000mAh",
-        price: 35.00,
-        image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&auto=format&fit=crop&q=60",
-        category: "electronics",
-        badge: "ommabop"
+        id: 5,
+        name: "Quyosh Ko'zoynagi",
+        price: 60000,
+        image: "./assets/sunglasses.jpg",
+        category: "accessories",
+        badge: "yozgi"
     },
     {
-        id: 9,
-        name: "Simsiz Kolonka",
-        price: 55.00,
-        image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&auto=format&fit=crop&q=60",
-        category: "electronics",
-        badge: null
+        id: 6,
+        name: "Ryukzak (Maktab uchun)",
+        price: 185000,
+        image: "./assets/backpack.jpg",
+        category: "accessories",
+        badge: "chegirma"
     }
 ];
 
@@ -63,6 +63,11 @@ let cart = {};
 const container = document.getElementById('products-container');
 const app = document.getElementById('app');
 const loader = document.getElementById('loader');
+
+// Helper to format currency
+function formatPrice(price) {
+    return price.toLocaleString('uz-UZ').replace(/,/g, ' ') + " so'm";
+}
 
 // Initialize
 function init() {
@@ -95,7 +100,7 @@ function renderProducts() {
             <div class="product-info">
                 <div class="product-name">${product.name}</div>
                 <div class="product-price-row">
-                    <span class="product-price">$${product.price.toFixed(2)}</span>
+                    <span class="product-price">${formatPrice(product.price)}</span>
                     <button class="add-btn ${count > 0 ? 'has-items' : ''}" onclick="addToCart(${product.id}, this)">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -142,7 +147,7 @@ function updateMainButton() {
     }, 0);
 
     if (totalItems > 0) {
-        tg.MainButton.setText(`Buyurtma berish ($${totalPrice.toFixed(2)})`);
+        tg.MainButton.setText(`Buyurtma berish (${formatPrice(totalPrice)})`);
         tg.MainButton.show();
     } else {
         tg.MainButton.hide();
