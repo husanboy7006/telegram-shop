@@ -1,22 +1,26 @@
 import { ShoppingCart } from 'lucide-react';
 
-const Header = ({ cartCount, onCartClick }) => {
+const Header = ({ title, showUserName = false }) => {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const firstName = tgUser?.first_name || 'Mehmon';
+
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-4 shadow-sm rounded-b-2xl flex justify-between items-center border-b border-gray-100 dark:border-gray-800 transition-colors">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-                Telegram Shop
-            </h1>
-            <button
-                onClick={onCartClick}
-                className="relative p-2.5 bg-indigo-50 dark:bg-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-400 active:scale-95 transition-transform"
-            >
-                <ShoppingCart size={22} />
-                {cartCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[11px] font-extrabold w-5 h-5 flex items-center justify-center rounded-full shadow-md animate-pulse border-2 border-white dark:border-gray-900">
-                        {cartCount}
+        <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 flex justify-between items-center shadow-sm dark:shadow-gray-950/20">
+            <div className="flex flex-col">
+                {showUserName && (
+                    <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">
+                        Xush kelibsiz, {firstName}
                     </span>
                 )}
-            </button>
+                <h1 className="text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent tracking-tight">
+                    {title || "Telegram Shop"}
+                </h1>
+            </div>
+
+            {/* Optional Right Action Area, maybe profile pic */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm shadow-inner border border-white/50 dark:border-white/5">
+                {firstName.charAt(0).toUpperCase()}
+            </div>
         </header>
     );
 };

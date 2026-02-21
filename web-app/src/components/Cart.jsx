@@ -51,17 +51,17 @@ const Cart = ({ cart, products, onUpdateQty, onCheckout }) => {
                 ))}
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 rounded-t-[32px] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+            <div className="fixed bottom-[72px] left-0 right-0 p-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 rounded-t-[32px] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
                 <div className="flex justify-between items-center mb-4 px-2 tracking-wide">
-                    <span className="text-gray-500 dark:text-gray-400 font-medium">Jami tasdiqlash uchun:</span>
-                    <span className="text-xl font-black text-gray-900 dark:text-white">
+                    <span className="text-gray-500 dark:text-gray-400 font-medium tracking-wider text-[12px] uppercase">Jami tasdiqlash:</span>
+                    <span className="text-2xl font-black text-gray-900 dark:text-white">
                         {total.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm
                     </span>
                 </div>
 
                 <button
                     onClick={onCheckout}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-[17px] shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30 active:scale-[0.98] transition-all"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-[20px] font-black tracking-wide text-[16px] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/40 active:scale-[0.98] transition-all"
                 >
                     Buyurtmaga o'tish
                 </button>
