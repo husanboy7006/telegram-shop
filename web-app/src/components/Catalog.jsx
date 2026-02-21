@@ -1,10 +1,10 @@
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import Header from './Header';
 import ProductCard from './ProductCard';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Catalog = ({ products, onAddToCart }) => {
+const Catalog = ({ products, onAddToCart, onProductClick }) => {
     const [activeCategory, setActiveCategory] = useState('Barchasi');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('popular');
@@ -35,10 +35,10 @@ const Catalog = ({ products, onAddToCart }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 transition-colors">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-28 pt-20 transition-colors">
             <Header title="Katalog" />
 
-            <div className="px-4 mt-2 sticky top-[72px] z-40 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-xl py-3 border-b border-transparent dark:border-transparent">
+            <div className="px-4 mt-2 sticky top-[72px] z-40 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-xl py-3 border-b border-transparent">
                 {/* Search & Sort */}
                 <div className="flex gap-2 mb-4">
                     <div className="relative flex-1">
@@ -57,7 +57,7 @@ const Catalog = ({ products, onAddToCart }) => {
                     <div className="relative">
                         <button
                             onClick={() => setIsSortOpen(!isSortOpen)}
-                            className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-200 h-full px-4 rounded-[16px] flex items-center gap-2 text-sm font-bold shadow-sm active:scale-95 transition-all"
+                            className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-200 h-full px-4 rounded-[16px] flex items-center gap-2 text-[13px] font-black tracking-wide shadow-sm active:scale-95 transition-all"
                         >
                             <span className="hidden sm:inline">{getSortLabel()}</span>
                             <span className="sm:hidden">Saralash</span>
@@ -73,15 +73,16 @@ const Catalog = ({ products, onAddToCart }) => {
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-900 rounded-[20px] shadow-2xl border border-gray-100 dark:border-gray-800 py-2 overflow-hidden z-20 origin-top-right"
+                                        className="absolute right-0 mt-2 w-52 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-[20px] shadow-2xl border border-gray-100 dark:border-gray-800 py-2 overflow-hidden z-20 origin-top-right"
                                     >
                                         {['popular', 'new', 'price_asc', 'price_desc'].map(sortKey => (
                                             <button
                                                 key={sortKey}
                                                 onClick={() => { setSortBy(sortKey); setIsSortOpen(false); }}
-                                                className={`w-full text-left px-5 py-3 text-[14px] transition-colors ${sortBy === sortKey ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-gray-800' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                                                className={`w-full text-left px-5 py-3.5 text-[14px] font-semibold transition-colors flex justify-between items-center ${sortBy === sortKey ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-gray-800' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                                             >
-                                                {sortKey === 'popular' ? 'Eng mashhur' : sortKey === 'new' ? 'Eng yangi' : sortKey === 'price_asc' ? 'Narx (Arzon → Qimmat)' : 'Narx (Qimmat → Arzon)'}
+                                                {sortKey === 'popular' ? 'Eng mashhur' : sortKey === 'new' ? 'Eng yangi' : sortKey === 'price_asc' ? 'Narx (Arzon.Qimmat)' : 'Narx (Qimmat.Arzon)'}
+                                                {sortBy === sortKey && <CheckCircle2 size={16} />}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -92,14 +93,14 @@ const Catalog = ({ products, onAddToCart }) => {
                 </div>
 
                 {/* Categories Horizontal Scroll */}
-                <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1 -mx-4 px-4">
+                <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1 -mx-4 px-4 overflow-y-hidden">
                     {categories.map(category => (
                         <button
                             key={category}
                             onClick={() => setActiveCategory(category)}
-                            className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[14px] font-bold transition-all duration-300 active:scale-95 ${activeCategory === category
-                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 dark:shadow-indigo-900/40 transform scale-105'
-                                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            className={`whitespace-nowrap px-6 py-3 rounded-[16px] text-[13px] uppercase font-black tracking-widest transition-all duration-300 active:scale-95 ${activeCategory === category
+                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-600/30'
+                                    : 'bg-white dark:bg-gray-900 border border-transparent dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                 }`}
                         >
                             {category}
@@ -108,14 +109,15 @@ const Catalog = ({ products, onAddToCart }) => {
                 </div>
             </div>
 
-            <div className="px-4 mt-4">
-                <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="px-4 mt-6">
+                <motion.div layout className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
                     <AnimatePresence>
                         {filtered.map(product => (
                             <ProductCard
                                 key={product.id}
                                 product={product}
                                 onAdd={onAddToCart}
+                                onClick={onProductClick}
                             />
                         ))}
                     </AnimatePresence>
@@ -126,9 +128,11 @@ const Catalog = ({ products, onAddToCart }) => {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                         className="text-center text-gray-500 dark:text-gray-400 py-20 flex flex-col items-center"
                     >
-                        <Search className="w-14 h-14 text-gray-300 dark:text-gray-700 mb-4" />
-                        <p className="font-semibold text-lg">Hech nima topilmadi</p>
-                        <p className="text-sm mt-1">Boshqa so'z bilan izlab ko'ring</p>
+                        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex justify-center items-center mb-4">
+                            <Search className="w-10 h-10 text-gray-400 dark:text-gray-600" />
+                        </div>
+                        <p className="font-black text-xl text-gray-800 dark:text-gray-200 mb-1">Hech nima topilmadi</p>
+                        <p className="text-[14px] font-medium opacity-80">Boshqa so'z bilan izlab ko'ring</p>
                     </motion.div>
                 )}
             </div>

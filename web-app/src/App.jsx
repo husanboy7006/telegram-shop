@@ -8,22 +8,33 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Profile from './components/Profile';
 import BottomNav from './components/BottomNav';
+import ProductModal from './components/ProductModal';
 import { PRODUCTS } from './data/products';
 
 function App() {
     const [cart, setCart] = useState({});
-    const [view, setView] = useState('home'); // home, catalog, cart, checkout, profile
+    const [view, setView] = useState('home');
     const [isLoaded, setIsLoaded] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
+    // Modal State
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
     // Native TG BackButton setup
     useEffect(() => {
-        setTimeout(() => setIsLoaded(true), 1200); // 1.2s loading effect for premium feel
+        // 1.5s simulated boot loading
+        setTimeout(() => setIsLoaded(true), 1500);
 
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
+            // Native pull to refresh setup if supported context
+            tg.enableClosingConfirmation();
+            if (tg.isExpanded) {
+                // we are fully loaded
+            }
+
             if (tg.colorScheme === 'dark') {
                 document.documentElement.classList.add('dark');
             }
@@ -35,7 +46,6 @@ function App() {
         }
     }, []);
 
-    // BackButton visibility
     useEffect(() => {
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -48,13 +58,12 @@ function App() {
         window.scrollTo(0, 0);
     }, [view]);
 
-    // Toast helper
     const showToast = (message) => {
         setToastMessage(message);
         if (window.Telegram?.WebApp?.HapticFeedback) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
-        setTimeout(() => setToastMessage(''), 2500);
+        setTimeout(() => setToastMessage(''), 3000);
     };
 
     const addToCart = (product) => {
@@ -82,25 +91,30 @@ function App() {
         if (window.Telegram?.WebApp && window.Telegram.WebApp.sendData) {
             window.Telegram.WebApp.sendData(JSON.stringify(payload));
         } else {
-            alert('Bu loyiha telegram orqali ishlaydi!');
+            alert('Bu loyiha telegram orqali ishlaydi! Ammo maʼlumot tayyorlandi.');
+            console.log("PAYLOAD: ", payload);
         }
     };
 
     const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
-    // Skeleton Loader Component
     const LoadingSkeleton = () => (
         <div className="pt-24 px-4 pb-24 min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
-            <div className="w-full h-40 bg-gray-200 dark:bg-gray-800 rounded-[28px] animate-pulse mb-8"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="bg-white dark:bg-gray-900 rounded-[24px] p-3 border border-gray-100 dark:border-gray-800 animate-pulse">
-                        <div className="w-full h-56 bg-gray-200 dark:bg-gray-800 rounded-[16px] mb-4"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-3"></div>
-                        <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-5"></div>
-                        <div className="flex justify-between items-end">
-                            <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
-                            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
+            <div className="w-full h-[300px] bg-gray-200 dark:bg-gray-800 rounded-[32px] animate-pulse mb-8 overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/5 to-transparent skew-x-12 translate-x-[-150%] animate-[shimmer_2s_infinite]"></div>
+            </div>
+            <div className="flex justify-between w-full h-8 mb-4 px-2">
+                <div className="w-32 h-6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+                <div className="w-16 h-6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="bg-white dark:bg-gray-900 rounded-[24px] p-2.5 border border-gray-100 dark:border-gray-800 animate-pulse h-64">
+                        <div className="w-full h-40 bg-gray-200 dark:bg-gray-800 rounded-[16px] mb-4"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full mb-3"></div>
+                        <div className="flex justify-between">
+                            <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
                         </div>
                     </div>
                 ))}
@@ -109,9 +123,8 @@ function App() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 selection:bg-indigo-100 overflow-x-hidden">
+        <div className="min-h-screen bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 selection:bg-indigo-100/30 overflow-x-hidden">
 
-            {/* Global Action Toast */}
             <AnimatePresence>
                 {toastMessage && (
                     <motion.div
@@ -121,28 +134,36 @@ function App() {
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         className="fixed top-6 left-1/2 z-[100]"
                     >
-                        <div className="bg-gray-900/95 dark:bg-white/95 backdrop-blur-xl text-white dark:text-gray-900 px-6 py-3.5 rounded-full shadow-2xl text-[14px] font-bold flex items-center gap-2.5 whitespace-nowrap">
-                            <CheckCircle2 size={18} className="text-green-400 dark:text-green-500" />
+                        <div className="bg-gray-900/95 dark:bg-white/95 backdrop-blur-xl text-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl text-[14px] font-black tracking-wide flex items-center gap-2.5 whitespace-nowrap">
+                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <CheckCircle2 size={14} className="text-white" />
+                            </div>
                             {toastMessage}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            <ProductModal
+                product={selectedProduct}
+                isOpen={!!selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+                onAdd={addToCart}
+            />
+
             {!isLoaded ? (
                 <LoadingSkeleton />
             ) : (
                 <>
-                    {/* Framer Motion for Page Transitions */}
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence mode="wait" initial={false}>
                         {view === 'home' && (
-                            <motion.div key="home" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
-                                <Home products={PRODUCTS} onAddToCart={addToCart} />
+                            <motion.div key="home" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
+                                <Home products={PRODUCTS} onAddToCart={addToCart} onProductClick={setSelectedProduct} />
                             </motion.div>
                         )}
                         {view === 'catalog' && (
-                            <motion.div key="catalog" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
-                                <Catalog products={PRODUCTS} onAddToCart={addToCart} />
+                            <motion.div key="catalog" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
+                                <Catalog products={PRODUCTS} onAddToCart={addToCart} onProductClick={setSelectedProduct} />
                             </motion.div>
                         )}
                         {view === 'cart' && (
@@ -156,13 +177,12 @@ function App() {
                             </motion.div>
                         )}
                         {view === 'profile' && (
-                            <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                            <motion.div key="profile" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
                                 <Profile />
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* Bottom Navigation is visible on specific pages */}
                     {['home', 'catalog', 'cart', 'profile'].includes(view) && (
                         <BottomNav activeView={view} onViewChange={setView} cartCount={totalItems} />
                     )}
